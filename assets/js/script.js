@@ -2,10 +2,12 @@ const apiKey = "744a9764e2e344e5caf523b79e9bef07"
 var city = "";
 var cityLat = "";
 var cityLon = "";
+var searchHistoryEl = document.querySelector("#search-history");
 var cityFormEl = document.querySelector("#city-form");
 var cityInputEl = document.querySelector("#cityname");
 var weatherContainerEl = document.querySelector("#weather-container");
 var citySearchTerm = document.querySelector("#city-search-term");
+let citySearchRecord = JSON.parse(localStorage.getItem(city)) || [];
 
 // https://api.openweathermap.org/data/2.5/weather?q=atlanta&units=imperial&appid=744a9764e2e344e5caf523b79e9bef07
 
@@ -41,7 +43,7 @@ var displayWeather = function (weather, searchCity) {
   citySearchTerm.appendChild(weatherIcon);
 
   var temperatureEl = document.createElement("span");
-  temperatureEl.textContent = "Temperature: " + weather.main.temp + " °F";
+  temperatureEl.textContent = "Temperature: " + Math.round(weather.main.temp) + " °F";
   temperatureEl.classList = "list-group-item"
  
   var humidityEl = document.createElement("span");
@@ -110,12 +112,35 @@ var formSubmitHandler = function(event) {
 
   if (city) {
     getWeather(city);
+    savedCities(city);
     cityInputEl.value = "";
   } else {
     alert("Please enter a city");
   }
 };
 
+var savedCities = function(city) {
+  var pastCities = document.createElement("li");
+  searchHistoryEl.appendChild(pastCities);
+
+  pastCities.innerHTML = `<button class='"btn btn-block"'> ${city} </button>`
+  var userSearch = {
+    citySearch: city
+  };
+  citySearchRecord.push(userSearch);
+  localStorage.setItem("city", JSON.stringify(userSearch));
+
+  $(".pastCities").on("click", function() {
+    localStorage.getItem($(this).text());
+
+    var city = $(this)
+      .text()
+      .trim();
+
+    getWeather(city);
+  });
+};
 
 
 cityFormEl.addEventListener("submit", formSubmitHandler);
+

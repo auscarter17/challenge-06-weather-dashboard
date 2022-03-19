@@ -18,3 +18,11 @@ header {
     background-color: green;
     color:white;
 }
+
+li {
+    list-style: none;
+}
+
+.btn {
+    display: block;
+}
