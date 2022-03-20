@@ -26,3 +26,7 @@ li {
 .btn {
     display: block;
 }
+
+.futurebox {
+    float:right;
+}

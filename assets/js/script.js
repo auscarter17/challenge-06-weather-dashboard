@@ -7,8 +7,9 @@ var cityFormEl = document.querySelector("#city-form");
 var cityInputEl = document.querySelector("#cityname");
 var weatherContainerEl = document.querySelector("#weather-container");
 var citySearchTerm = document.querySelector("#city-search-term");
-let citySearchRecord = JSON.parse(localStorage.getItem(city)) || [];
-
+var citySearchRecord = JSON.parse(localStorage.getItem(city)) || [];
+var futureContainer = document.querySelector("#future-container");
+var forecastTitle = document.querySelector("#forecast");
 // https://api.openweathermap.org/data/2.5/weather?q=atlanta&units=imperial&appid=744a9764e2e344e5caf523b79e9bef07
 
 var getWeather = function(city) {
@@ -102,7 +103,6 @@ var displayUvIndex = function(data) {
   
 
   uvIndexEl.appendChild(uvIndexSig);
-  //append index to current weather
   weatherContainerEl.appendChild(uvIndexEl);
 }
 
@@ -112,12 +112,66 @@ var formSubmitHandler = function(event) {
 
   if (city) {
     getWeather(city);
+    getFuture(city);
     savedCities(city);
     cityInputEl.value = "";
   } else {
     alert("Please enter a city");
   }
 };
+
+var getFuture = function(city){
+  var apiURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`
+
+  fetch(apiURL)
+  .then(function(response){
+      response.json().then(function(data){
+         displayFuture(data);
+      });
+  });
+};
+
+var displayFuture = function(weather){
+  futureContainer.textContent = "";
+  forecastTitle.textContent = "5-Day Forecast:";
+
+  var forecast = weather.list;
+      for(var i=5; i < forecast.length; i=i+8){
+     var dailyForecast = forecast[i];
+      
+     
+     var forecastEl=document.createElement("div");
+     forecastEl.classList = "card bg-primary text-light m-2";
+
+
+     var forecastDate = document.createElement("h5")
+     forecastDate.textContent= moment.unix(dailyForecast.dt).format("MMM D, YYYY");
+     forecastDate.classList = "card-header text-center"
+     forecastEl.appendChild(forecastDate);
+
+     
+     var weatherIcon = document.createElement("img")
+     weatherIcon.classList = "card-body text-center";
+     weatherIcon.setAttribute("src", `https://openweathermap.org/img/wn/${dailyForecast.weather[0].icon}@2x.png`);  
+
+     forecastEl.appendChild(weatherIcon);
+     
+     var forecastTempEl=document.createElement("span");
+     forecastTempEl.classList = "card-body text-center";
+     forecastTempEl.textContent = dailyForecast.main.temp + " °F";
+
+      forecastEl.appendChild(forecastTempEl);
+
+     var forecastHumEl=document.createElement("span");
+     forecastHumEl.classList = "card-body text-center";
+     forecastHumEl.textContent = dailyForecast.main.humidity + "  %";
+
+    forecastEl.appendChild(forecastHumEl);
+
+    futureContainer.appendChild(forecastEl);
+  }
+
+}
 
 var savedCities = function(city) {
   var pastCities = document.createElement("li");
